@@ -78,7 +78,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-`just-talk` allows you to use any `justfile` as a list of agents that can be called to perform tasks.
+`just-talk` allows you to use any [justfile](https://github.com/casey/just) as a list of tools that can be called by an LLM to perform tasks.
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
@@ -89,13 +89,17 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To get a local copy up and running follow these simple steps.
+Follow these steps.
 
 ### Prerequisites
 
-You'll need an API access to either OpenAI or Azure OpenAI API.
+You'll need access to either OpenAI or Azure OpenAI API.
 
-You'll need a `justfile` with some commands listed. 
+You'll need a `justfile` with some commands listed. This can be your project's list of commands or a separate one written specifically to run some commands from the command line.
+
+### Note
+
+Trusting the output of an LLM is an inherently risky endeavor. Please make sure you only put the commands in the `justfile` that you are comfortable running with arbitrary arguments.
 
 ### Usage
 
