@@ -105,7 +105,7 @@ You'll need a `justfile` with some commands listed.
     JUST_TALK_OPENAI_API_KEY=123...
     # JUST_TALK_AZURE_ENDPOINT=https://xxx.openai.azure.com/ # <- if using Azure OpenAI
     # JUST_TALK_AZURE_DEPLOYMENT_ID=yyy # <- if using Azure OpenAI
-    # JUST_TALK_LOG_LEVEL=debug # <- optional
+    # JUST_TALK_LOG_LEVEL=debug # <- optional, defaults to 'info'
    ```
 3. Run with Go
    ```sh
