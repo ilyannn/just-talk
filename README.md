@@ -86,7 +86,6 @@
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -110,7 +109,7 @@ You'll need a `justfile` with some commands listed.
    ```
 3. Run with Go
    ```sh
-   go run https://github.com/ilyannn/just-talk
+   go run github.com/ilyannn/just-talk@latest
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
