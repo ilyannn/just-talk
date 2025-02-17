@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/Azure/azure-sdk-for-go/sdk/ai/azopenai"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/to"
-	"log"
+	"github.com/charmbracelet/glamour"
 	"os"
 	"os/exec"
 	"strings"
@@ -70,13 +70,15 @@ func runLoop(client *azopenai.Client, deploymentId string, recipes []Recipe) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
-		fmt.Print("*** What do you want to do (empty to quit)? ")
+		fmt.Print(PromptStyle.Render("*** What do you want to do (empty to quit)? "))
+
 		userInput, _ := reader.ReadString('\n')
 		userInput = strings.TrimSpace(userInput)
 		if userInput == "" {
 			break
 		}
 
+		log.Debugf("Starting LLM request...")
 		resp, err := client.GetChatCompletions(context.TODO(), azopenai.ChatCompletionsOptions{
 			DeploymentName: &deploymentId,
 			Messages: []azopenai.ChatRequestMessageClassification{
@@ -88,13 +90,19 @@ func runLoop(client *azopenai.Client, deploymentId string, recipes []Recipe) {
 		}, nil)
 
 		if err != nil {
-			log.Printf("Error when accessing the LLM: %s", err)
+			log.With("err", err).Errorf("Error when accessing the LLM")
 			continue
+		} else {
+			log.With("model", *resp.Model, "input_tokens", *resp.Usage.PromptTokens, "output_tokens", *resp.Usage.CompletionTokens).Debugf("LLM request done")
 		}
 
 		content := resp.Choices[0].Message.Content
 		if content != nil && *content != "" {
-			fmt.Printf("LLM says: %s\n", *content)
+			out, err := glamour.Render(*content, "auto")
+			if err != nil {
+				log.With("err", err).Errorf("Failed to render markdown")
+			}
+			fmt.Print(out)
 		}
 
 		toolCalls := resp.Choices[0].Message.ToolCalls
@@ -105,13 +113,13 @@ func runLoop(client *azopenai.Client, deploymentId string, recipes []Recipe) {
 			err = json.Unmarshal([]byte(*function.Arguments), &parameters)
 
 			if err != nil {
-				log.Printf("Error when unpacking tool arguments: %s", err)
+				log.With("err", err).Errorf("Error when unpacking tool arguments")
 				continue
 			}
 
 			recipe := recipesByTool[*function.Name]
 			if recipe == nil {
-				log.Printf("Unknown tool name: %s", *function.Name)
+				log.With("tool", *function.Name).Errorf("Unknown tool name")
 				continue
 			}
 
@@ -126,7 +134,9 @@ func runLoop(client *azopenai.Client, deploymentId string, recipes []Recipe) {
 				}
 			}
 
-			log.Printf("$ just %s\n", strings.Join(argLine, " "))
+			formattedCommand := strings.Join([]string{"just", strings.Join(argLine, " ")}, " ")
+
+			log.With("command", formattedCommand).Infof("Running")
 			cmd := exec.Command("just", argLine...)
 
 			cmd.Stdout = os.Stdout
@@ -134,7 +144,7 @@ func runLoop(client *azopenai.Client, deploymentId string, recipes []Recipe) {
 
 			err := cmd.Run()
 			if err != nil {
-				log.Printf("Failed to run: %v", err)
+				log.With("err", err).Errorf("Failed to run")
 			}
 		}
 	}
